@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administración | ECO UNIVERSITARIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+.admin{padding:55px 0}.admin-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:35px}
+.admin h1{font-family:"Playfair Display";font-size:46px;margin:8px 0}.panel{background:#fff;border:1px solid var(--line);padding:30px;box-shadow:var(--shadow)}
+form{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}
+label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+input,select,textarea{font:inherit;padding:12px;border:1px solid var(--line);background:#fafafa}textarea{min-height:170px;resize:vertical}
+button.primary{border:0;background:var(--accent);color:#fff;padding:13px 20px;font-weight:700;cursor:pointer}.notice{margin-top:20px;padding:12px;background:#edf5f0;color:var(--accent-dark);display:none}
+.table-wrap{overflow:auto;margin-top:35px}.admin-table{width:100%;border-collapse:collapse;min-width:700px}.admin-table th,.admin-table td{text-align:left;padding:13px;border-bottom:1px solid var(--line);font-size:13px}.delete{border:0;background:none;color:#a33;cursor:pointer;font-weight:700}
+@media(max-width:650px){form{grid-template-columns:1fr}.field.full{grid-column:auto}.admin h1{font-size:38px}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="topbar"><div class="container topbar-inner"><span>Universidad Canadiense</span><a href="index.html">← Ver periódico</a></div></div>
+<div class="container masthead"><a class="brand" href="index.html"><span class="brand-mark">EU</span><span><strong>ECO</strong><em>UNIVERSITARIO</em></span></a><div class="masthead-tag">Panel de administración académico</div></div></header>
+<main class="container admin">
+<div class="admin-head"><div><span class="eyebrow">ADMINISTRACIÓN</span><h1>Publicar noticia</h1><p>Agrega contenidos para la próxima edición de ECO UNIVERSITARIO.</p></div></div>
+<div class="panel">
+<form id="newsForm">
+<div class="field"><label for="title">Título</label><input id="title" required maxlength="120" placeholder="Título de la noticia"></div>
+<div class="field"><label for="section">Sección</label><select id="section" required><option>Arquitectura</option><option>Informática</option><option>Contaduría</option><option>Derecho</option><option>Pedagogía</option></select></div>
+<div class="field"><label for="author">Autor</label><input id="author" required placeholder="Nombre del autor"></div>
+<div class="field"><label for="date">Fecha</label><input id="date" type="date" required></div>
+<div class="field full"><label for="excerpt">Resumen</label><input id="excerpt" required maxlength="220" placeholder="Breve descripción que aparecerá en la portada"></div>
+<div class="field full"><label for="body">Contenido</label><textarea id="body" required placeholder="Escribe aquí el contenido completo de la noticia..."></textarea></div>
+<div class="field"><label for="image">Iniciales / identificador visual</label><input id="image" maxlength="4" placeholder="EU"></div>
+<div class="field" style="justify-content:end"><button class="primary" type="submit">Publicar noticia</button></div>
+</form>
+<div class="notice" id="notice">Noticia publicada correctamente en este navegador.</div>
+</div>
+<div class="table-wrap"><table class="admin-table"><thead><tr><th>Fecha</th><th>Sección</th><th>Título</th><th>Autor</th><th></th></tr></thead><tbody id="newsTable"></tbody></table></div>
+</main>
+<footer><div class="container copyright">© <span id="year"></span> ECO UNIVERSITARIO · Panel académico</div></footer>
+<script>
+const KEY="eco_universitario_noticias_v1";
+const get=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}};
+const set=x=>localStorage.setItem(KEY,JSON.stringify(x));
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function render(){document.getElementById("newsTable").innerHTML=get().sort((a,b)=>b.date.localeCompare(a.date)).map(n=>`<tr><td>${esc(n.date)}</td><td>${esc(n.section)}</td><td>${esc(n.title)}</td><td>${esc(n.author)}</td><td><button class="delete" data-id="${n.id}">Eliminar</button></td></tr>`).join("")||"<tr><td colspan='5'>No hay noticias.</td></tr>";document.querySelectorAll(".delete").forEach(b=>b.onclick=()=>{set(get().filter(n=>n.id!==Number(b.dataset.id)));render()})}
+document.getElementById("date").value=new Date().toISOString().slice(0,10);
+document.getElementById("newsForm").onsubmit=e=>{e.preventDefault();const n=get();n.push({id:Date.now(),title:title.value,section:section.value,author:author.value,date:date.value,excerpt:excerpt.value,body:body.value,image:image.value||"EU"});set(n);e.target.reset();date.value=new Date().toISOString().slice(0,10);notice.style.display="block";setTimeout(()=>notice.style.display="none",2500);render()};
+year.textContent=new Date().getFullYear();render();
+</script>
+</body>
+</html>
